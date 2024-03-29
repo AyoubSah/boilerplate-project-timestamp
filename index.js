@@ -24,15 +24,27 @@ app.get("/api/hello", function (req, res) {
 });
 
 function getFormattedDate(dateString) {
-  const date = new Date(dateString);  // Direct parsing with new Date
-  // Check if the parsed date object is valid (not NaN)
-  return !isNaN(date.getTime()) ? date : null;
+  let date;
+  // Try parsing the date string in YYYY-MM-DD format
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    const [year, month, day] = dateString.split('-');
+    date = new Date(Date.UTC(year, month - 1, day));
+  } else {
+    // Try parsing the date string as a Unix timestamp
+    date = new Date(parseInt(dateString));
+  }
+  return date;
 }
 
 function handleRequest(req, res) {
   const dateString = req.params.dateString || '';  // Handle empty parameter
 
-  const formattedData = getFormattedDate(dateString);
+  let formattedData;
+  if (dateString) {
+    formattedData = getFormattedDate(dateString);
+  } else {
+    formattedData = new Date(); // Use current time for empty parameter
+  }
 
   if (!formattedData) {
     return res.status(400).json({ error: 'Invalid Date' });
