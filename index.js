@@ -22,41 +22,53 @@ app.get("/", function (req, res) {
 app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
+app.get("/api/:date?", (req,res) => {
+  let input = req.params.date;
 
-function getFormattedDate(dateString) {
-  let date;
-  // Try parsing the date string in YYYY-MM-DD format
-  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-    date = new Date(dateString);
-  } else {
-    // Try parsing the date string as a Unix timestamp
-    date = new Date(parseInt(dateString));
+  /*1.create variable for checking :  
+      a.isValidDate 
+        to check if input is string with valid date format -> 
+        if not valid date, it will return NaN 
+        example : 
+        -valid   : 2015-12-25, 
+        -invalid : 2015-02-31, 1451001600000
+  */
+  let isValidDate       = Date.parse(input); 
+
+  /*  b.isValidUnixNumber
+        to check if input is string with whole number(no symbol or character in the middle of input) -> 
+        it must be valid unix (source : https://benjaminsemah.com/build-timestamp-microservice)
+  */
+  let isValidUnixNumber = /^[0-9]+$/.test(input)
+
+  //  c.isEmpty to check there is nothing in input
+  let isEmpty = input == "" || input == null;
+  
+  //3.create another variables used in if-else
+  let unix_output = 0;
+  let utc_output  = "";
+  
+  if (isValidDate) {
+    unix_output = new Date(input);
+    utc_output  = unix_output.toUTCString();
+    // valueOf used for getting a variable back to primitive type
+    return res.json({unix : unix_output.valueOf(), utc : utc_output});
   }
-  return date;
-}
-
-function handleRequest(req, res) {
-  const dateString = req.params.dateString || '';  // Handle empty parameter
-
-  let formattedData;
-  if (dateString) {
-    formattedData = getFormattedDate(dateString);
-  } else {
-    formattedData = new Date(); // Use current time for empty parameter
+  else if (isNaN(isValidDate) && isValidUnixNumber) {
+    unix_output = new Date(parseInt(input));
+    utc_output  = unix_output.toUTCString();
+    return res.json({unix : unix_output.valueOf(), utc : utc_output});
   }
-
-  if (!formattedData) {
-    return res.status(400).json({ error: 'Invalid Date' });
+  else if (isEmpty) {
+    unix_output = new Date();
+    utc_output  = unix_output.toUTCString();
+    return res.json({unix : unix_output.valueOf(), utc : utc_output});  
   }
-
-
-
-  res.json({
-    unix: formattedData.getTime(),
-    utc: formattedData.toUTCString()
-  });
-}
-app.get('/api/:dateString?', handleRequest);
+  else {
+    res.json({error: "Invalid Date"});
+  }
+  
+});
 
 
 // Listen on port set in environment variable or default to 3000
