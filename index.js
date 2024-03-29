@@ -27,8 +27,7 @@ function getFormattedDate(dateString) {
   let date;
   // Try parsing the date string in YYYY-MM-DD format
   if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-    const [year, month, day] = dateString.split('-');
-    date = new Date(Date.UTC(year, month - 1, day));
+    date = new Date(dateString);
   } else {
     // Try parsing the date string as a Unix timestamp
     date = new Date(parseInt(dateString));
