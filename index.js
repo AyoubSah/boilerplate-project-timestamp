@@ -27,12 +27,14 @@ app.get("/api/hello", function (req, res) {
 function getFormattedDate(dateString) {
   let date;
   // Try parsing the date string in YYYY-MM-DD format
+  if (dateString = '') date = new Date(Now)
   if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
     const [year, month, day] = dateString.split('-');
     date = new Date(Date.UTC(year, month - 1, day));
   } else {
+    if (dateString = '') date = new Date(Now)
     // Try parsing the date string as a Unix timestamp
-    date = new Date(parseInt(dateString));
+    else date = new Date(parseInt(dateString));
   }
   if (!date) {
     return null; // Return null for invalid date formats
@@ -44,7 +46,7 @@ app.get('/api/:dateString', (req, res) => {
   const dateString = req.params.dateString;
   const formattedData = getFormattedDate(dateString);
   if (!formattedData) {
-    return res.status(400).send('Invalid date format');
+    return res.status(400).json({ error : "Invalid Date" });
   }
   res.json(formattedData);
 });
