@@ -23,33 +23,41 @@ app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
 
-
 function getFormattedDate(dateString) {
   let date;
   // Try parsing the date string in YYYY-MM-DD format
-  if (dateString = '') date = new Date(Now)
   if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
     const [year, month, day] = dateString.split('-');
     date = new Date(Date.UTC(year, month - 1, day));
   } else {
-    if (dateString = '') date = new Date(Now)
     // Try parsing the date string as a Unix timestamp
-    else date = new Date(parseInt(dateString));
+    date = new Date(parseInt(dateString));
   }
-  if (!date) {
-    return null; // Return null for invalid date formats
+  return date;
+}
+
+function handleRequest(req, res) {
+  const dateString = req.params.dateString || '';  // Handle empty parameter
+
+  let formattedData;
+  if (dateString) {
+    formattedData = getFormattedDate(dateString);
+  } else {
+    formattedData = new Date(); // Use current time for empty parameter
   }
 
-  return { unix: date.getTime(), utc: date.toUTCString() };
-}
-app.get('/api/:dateString', (req, res) => {
-  const dateString = req.params.dateString;
-  const formattedData = getFormattedDate(dateString);
   if (!formattedData) {
-    return res.status(400).json({ error : "Invalid Date" });
+    return res.status(400).json({ error: 'Invalid Date' });
   }
-  res.json(formattedData);
-});
+
+
+
+  res.json({
+    unix: formattedData.getTime(),
+    utc: formattedData.toUTCString()
+  });
+}
+app.get('/api/:dateString?', handleRequest);
 
 
 // Listen on port set in environment variable or default to 3000
