@@ -28,7 +28,7 @@ function getFormattedDate(dateString) {
   // Try parsing the date string in YYYY-MM-DD format
   if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
     date = new Date(dateString);
-  } else {
+  } else if (typeof dateString === Number){
     // Try parsing the date string as a Unix timestamp
     date = new Date(parseInt(dateString));
   }
